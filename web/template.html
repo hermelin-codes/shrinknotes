@@ -101,6 +101,19 @@ h1 { font-weight: 800; font-size: clamp(34px, 8vw, 52px); line-height: 1.04; let
 .note { color: var(--pencil); font-size: 15px; }
 .err { margin: 0; font-size: 18px; }
 
+/* ---- several files */
+.files { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.row { display: grid; gap: 4px; }
+.row-top { display: flex; justify-content: space-between; align-items: baseline; gap: 4px 12px; flex-wrap: wrap; }
+.row-name { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.row-info { color: var(--pencil); font-size: 15px; font-variant-numeric: tabular-nums; }
+.row .line { height: 14px; }
+.row[data-state="done"] .line, .row[data-state="error"] .line { display: none; }
+.row[data-state="waiting"] .row-name { color: var(--pencil); font-weight: 400; }
+.row[data-state="error"] .row-info { color: var(--ink); }
+.row-save { font-size: 15px; padding: 2px 0; }
+.multi-sum { margin: 0; font-size: 19px; }
+
 /* ---- footer */
 footer { display: grid; gap: 8px; color: var(--pencil); font-size: 14px; }
 footer a { color: inherit; text-decoration: underline; text-decoration-color: var(--dot); text-underline-offset: 3px; }
@@ -133,9 +146,9 @@ details h3 + p { margin-top: 2px; }
   <section id="sheet" class="sheet" aria-live="polite">
     <div id="view-idle">
       <label id="drop" for="file">
-        <input id="file" class="sr" type="file" accept="application/pdf,.pdf">
-        <span class="big">Drop your PDF here</span>
-        <span class="btn btn-pen fake" aria-hidden="true">Choose a PDF</span>
+        <input id="file" class="sr" type="file" accept="application/pdf,.pdf" multiple>
+        <span class="big">Drop your PDFs here</span>
+        <span class="btn btn-pen fake" aria-hidden="true">Choose PDFs</span>
       </label>
     </div>
 
@@ -156,6 +169,16 @@ details h3 + p { margin-top: 2px; }
         <button id="save" class="btn btn-pen" type="button">Save PDF</button>
         <button id="again" class="link" type="button">Shrink another one</button>
         <span id="save-note" class="note" role="status"></span>
+      </div>
+    </div>
+
+    <div id="view-multi" class="panel" hidden>
+      <ul id="multi-list" class="files"></ul>
+      <p id="multi-sum" class="multi-sum" hidden></p>
+      <div class="actions">
+        <button id="save-all" class="btn btn-pen" type="button" hidden>Save all as ZIP</button>
+        <button id="again-multi" class="link" type="button" hidden>Shrink more</button>
+        <span id="multi-note" class="note" role="status"></span>
       </div>
     </div>
 
@@ -185,4 +208,13 @@ details h3 + p { margin-top: 2px; }
     <span>Free &amp; <a href="https://github.com/hermelin-codes/shrinknotes" target="_blank" rel="noopener">open source on GitHub</a> · Not affiliated with GoodNotes</span>
   </footer>
 </main>
+<template id="row-tpl">
+  <li class="row" data-state="waiting">
+    <div class="row-top"><span class="row-name"></span><span class="row-info">Waiting…</span></div>
+    <svg class="line" viewBox="0 0 400 14" preserveAspectRatio="none" aria-hidden="true">
+      <clipPath><rect x="-6" y="-10" width="0" height="34"/></clipPath>
+      <path class="ink" d="M3 8 C 80 3, 150 12, 220 7 S 330 4, 397 8" fill="none" stroke-width="3.5" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+    </svg>
+  </li>
+</template>
 <script>/*__APP__*/</script>

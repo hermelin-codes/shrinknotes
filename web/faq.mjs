@@ -17,6 +17,10 @@ export const FAQ = [
     a: 'Yes. The PDF is processed entirely in your browser and never uploaded to any server.',
   },
   {
+    q: 'Can I shrink several PDFs at once?',
+    a: 'Yes. Select or drop several PDFs together. They are processed one after another, and you can save each file on its own or all of them as one ZIP.',
+  },
+  {
     q: 'Does it work on iPad?',
     a: 'Yes, it runs in Safari on iPad and iPhone and in any current browser on Mac, Windows and Linux. Very large files can hit the memory limit of older iPads; use a computer for those.',
   },
