@@ -71,6 +71,7 @@ const standalone = `<!doctype html>
 <meta name="description" content="${DESCRIPTION}">
 <link rel="canonical" href="${SITE_URL}">
 <meta name="google-site-verification" content="r7uLQ8P6uCxjhFmRTjHVPOYxPbBk2Y86NVCqoM9Z-tU">
+<meta name="msvalidate.01" content="558043649259DF86A80A1F4F68D1CA2B">
 <link rel="icon" href="${favicon}">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="theme-color" content="#f3ead9">
