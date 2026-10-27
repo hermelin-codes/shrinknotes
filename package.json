@@ -8,7 +8,8 @@
   "scripts": {
     "build": "node build.mjs",
     "shrink": "node test/cli.mjs",
-    "test:browser": "node test/browser.cjs"
+    "test:browser": "node test/browser.cjs",
+    "test": "node test/geometry.mjs"
   },
   "dependencies": {
     "clipper2-ts": "^2.0.1-18",

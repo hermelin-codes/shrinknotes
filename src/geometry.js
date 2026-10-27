@@ -19,8 +19,30 @@ export function unionStroke(ops, nums, evenOdd) {
   let path = null;
   let cx = 0, cy = 0, sx = 0, sy = 0;
   let k = 0;
-  const push = (x, y) => { path.push({ x: Math.round(x * SCALE), y: Math.round(y * SCALE) }); };
-  const close = () => { if (path && path.length >= 3) paths.push(path); path = null; };
+  // Points that repeat or lie on a straight line with their neighbours carry no shape,
+  // but they can send clipper2-ts into an endless loop (seen on PDFs with coarsely
+  // rounded coordinates), so they are dropped while the polygon is built.
+  const push = (x, y) => {
+    const p = { x: Math.round(x * SCALE), y: Math.round(y * SCALE) };
+    let n = path.length;
+    if (n && path[n - 1].x === p.x && path[n - 1].y === p.y) return;
+    while (n >= 2 && collinear(path[n - 2], path[n - 1], p)) { path.pop(); n--; }
+    path.push(p);
+  };
+  const close = () => {
+    if (path) {
+      // the ring wraps around: also check the seam between last and first points
+      while (path.length >= 3) {
+        const n = path.length;
+        if (path[0].x === path[n - 1].x && path[0].y === path[n - 1].y) path.pop();
+        else if (collinear(path[n - 2], path[n - 1], path[0])) path.pop();
+        else if (collinear(path[n - 1], path[0], path[1])) path.shift();
+        else break;
+      }
+      if (path.length >= 3) paths.push(path);
+    }
+    path = null;
+  };
 
   for (let i = 0; i < ops.length; i++) {
     const op = ops[i];
@@ -70,6 +92,10 @@ export function unionStroke(ops, nums, evenOdd) {
     if (simp.length >= 6) rings.push(simp);
   }
   return rings;
+}
+
+function collinear(a, b, c) {
+  return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x) === 0;
 }
 
 // Douglas–Peucker on a closed ring (Clipper integer points) → flat user-unit array
