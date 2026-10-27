@@ -1,0 +1,186 @@
+<title>ShrinkNotes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Compress GoodNotes PDFs without blurring your handwriting. Runs entirely in your browser.">
+<style>
+/*__FONTS__*/
+/* Layout: one sheet of dotted notebook paper taped to a warm desk; everything else is a pen note around it. */
+:root {
+  --desk: #f3ead9;
+  --paper: #fffaf0;
+  --dot: #d9cbb0;
+  --ink: #2a2520;
+  --pencil: #7a6d5d;
+  --pen: #2c57c9;
+  --pen-ink: #fffaf0;
+  --marker: #ffe36e;
+  --tape: rgba(222, 205, 168, .72);
+  --shadow: 0 1px 0 rgba(80, 60, 30, .06), 0 10px 24px -12px rgba(80, 60, 30, .35);
+  --font-hand: "Shantell Sans", "Comic Neue", "Chalkboard SE", ui-rounded, system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --desk: #1d1915; --paper: #27221c; --dot: #463c30; --ink: #f3ead9; --pencil: #b4a690;
+    --pen: #8eaeff; --pen-ink: #1d1915; --marker: rgba(255, 214, 64, .38); --tape: rgba(120, 104, 78, .6);
+    --shadow: 0 1px 0 rgba(0,0,0,.3), 0 14px 30px -14px rgba(0,0,0,.8); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --desk: #1d1915; --paper: #27221c; --dot: #463c30; --ink: #f3ead9; --pencil: #b4a690;
+  --pen: #8eaeff; --pen-ink: #1d1915; --marker: rgba(255, 214, 64, .38); --tape: rgba(120, 104, 78, .6);
+  --shadow: 0 1px 0 rgba(0,0,0,.3), 0 14px 30px -14px rgba(0,0,0,.8); color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { min-height: 100%; }
+body {
+  background: var(--desk); color: var(--ink);
+  font-family: var(--font-hand); font-size: 17px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap {
+  max-width: 620px; margin: 0 auto; min-height: 100vh; min-height: 100dvh;
+  padding-block: 32px 28px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; grid-template-rows: auto auto 1fr auto; gap: 28px;
+}
+.mark { font-weight: 800; font-size: 18px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; }
+.mark svg { width: 24px; height: 24px; color: var(--pen); }
+h1 { font-weight: 800; font-size: clamp(34px, 8vw, 52px); line-height: 1.04; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+.hl { background: linear-gradient(transparent 58%, var(--marker) 58%, var(--marker) 92%, transparent 92%); padding: 0 .08em; margin: 0 -.08em; }
+.sub { margin: 10px 0 0; color: var(--pencil); font-size: 17px; }
+
+/* ---- the sheet */
+.sheet {
+  position: relative; align-self: start;
+  background-color: var(--paper);
+  background-image: radial-gradient(var(--dot) 1.3px, transparent 1.6px);
+  background-size: 20px 20px; background-position: 10px 10px;
+  border-radius: 4px; box-shadow: var(--shadow);
+  transform: rotate(-0.7deg);
+  transition: transform .2s ease;
+}
+.sheet::before, .sheet::after {
+  content: ""; position: absolute; width: 92px; height: 26px; background: var(--tape);
+  top: -12px; border-radius: 2px;
+}
+.sheet::before { left: 18px; transform: rotate(-6deg); }
+.sheet::after { right: 18px; transform: rotate(5deg); }
+.sheet.over { transform: rotate(0deg) scale(1.01); }
+
+#drop {
+  display: grid; place-items: center; text-align: center; align-content: center; gap: 12px;
+  min-height: 280px; padding: 36px 20px; cursor: pointer; border-radius: 4px;
+}
+#drop:focus-within { outline: 3px solid var(--pen); outline-offset: 4px; }
+.big { font-weight: 800; font-size: 26px; line-height: 1.15; }
+.small { color: var(--pencil); font-size: 15px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.btn {
+  appearance: none; border: 2px solid var(--ink); cursor: pointer;
+  font: 600 16px/1 var(--font-hand); min-height: 48px; padding: 12px 22px;
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;   /* hand-drawn outline */
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent; color: var(--ink);
+  transition: transform .12s ease;
+}
+.btn:hover { transform: rotate(-1.5deg); }
+.btn:focus-visible { outline: 3px solid var(--pen); outline-offset: 3px; }
+.btn-pen { background: var(--pen); border-color: var(--pen); color: var(--pen-ink); }
+.fake { pointer-events: none; margin-top: 6px; }
+.link { appearance: none; background: none; border: 0; padding: 6px 2px; cursor: pointer; font: inherit; color: var(--pencil); text-decoration: underline; text-decoration-style: wavy; text-underline-offset: 4px; }
+.link:hover { color: var(--ink); }
+.link:focus-visible { outline: 3px solid var(--pen); outline-offset: 2px; border-radius: 4px; }
+
+.panel { display: grid; gap: 18px; padding: 36px 26px 30px; min-height: 280px; align-content: center; }
+.fname { font-size: 15px; color: var(--pencil); overflow-wrap: anywhere; margin: 0; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* progress = a pen line being drawn */
+.line { width: 100%; height: 26px; display: block; overflow: visible; }
+.line .guide { stroke: var(--dot); }
+.line .ink { stroke: var(--pen); transition: stroke-dashoffset .3s ease-out; }
+.status { display: flex; justify-content: space-between; gap: 12px; color: var(--pencil); font-size: 15px; }
+
+.result { font-weight: 800; font-size: clamp(30px, 8vw, 46px); line-height: 1.1; letter-spacing: -0.02em; margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.result s { color: var(--pencil); font-weight: 600; text-decoration-color: var(--pen); text-decoration-thickness: 3px; }
+.result .arrow { color: var(--pen); font-weight: 600; }
+.smaller { margin: 0; font-size: 19px; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; }
+.note { color: var(--pencil); font-size: 15px; }
+.err { margin: 0; font-size: 18px; }
+
+/* ---- footer */
+footer { display: grid; gap: 8px; color: var(--pencil); font-size: 14px; }
+details { max-width: 56ch; }
+summary { cursor: pointer; width: fit-content; text-decoration: underline; text-decoration-style: wavy; text-underline-offset: 4px; }
+summary:focus-visible { outline: 3px solid var(--pen); outline-offset: 2px; border-radius: 4px; }
+details p { margin: 8px 0 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+  .sheet, .sheet.over { transform: none; }
+}
+</style>
+
+<main class="wrap">
+  <div class="mark">
+    <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M4 20c4-9 7-12 9-10s-3 9 0 9 6-12 9-11 1 8 6 8" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    ShrinkNotes
+  </div>
+
+  <header>
+    <h1>Compress your <span class="hl">GoodNotes</span> PDF.</h1>
+    <p class="sub">Your handwriting stays sharp. Your file never leaves your device.</p>
+  </header>
+
+  <section id="sheet" class="sheet" aria-live="polite">
+    <div id="view-idle">
+      <label id="drop" for="file">
+        <input id="file" class="sr" type="file" accept="application/pdf,.pdf">
+        <span class="big">Drop your PDF here</span>
+        <span class="btn btn-pen fake" aria-hidden="true">Choose a PDF</span>
+      </label>
+    </div>
+
+    <div id="view-work" class="panel" hidden>
+      <p id="work-name" class="fname"></p>
+      <svg class="line" viewBox="0 0 400 26" preserveAspectRatio="none" role="progressbar" id="bar" aria-label="Progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <path class="guide" d="M3 14 C 60 4, 110 22, 170 13 S 290 6, 397 14" fill="none" stroke-width="2" stroke-dasharray="2 7" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+        <path id="bar-fill" class="ink" d="M3 14 C 60 4, 110 22, 170 13 S 290 6, 397 14" fill="none" stroke-width="4.5" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" vector-effect="non-scaling-stroke"/>
+      </svg>
+      <div class="status"><span id="phase">Reading file…</span><span id="pct" class="mono">0%</span></div>
+    </div>
+
+    <div id="view-done" class="panel" hidden>
+      <p id="done-name" class="fname"></p>
+      <p class="result"><s id="done-before"></s><span class="arrow" aria-label="to">→</span><span id="done-after"></span></p>
+      <p class="smaller"><span id="done-saving" class="hl"></span> <span id="done-detail" class="note"></span></p>
+      <div class="actions">
+        <button id="save" class="btn btn-pen" type="button">Save PDF</button>
+        <button id="again" class="link" type="button">Shrink another one</button>
+        <span id="save-note" class="note" role="status"></span>
+      </div>
+    </div>
+
+    <div id="view-error" class="panel" hidden>
+      <p id="error-msg" class="err"></p>
+      <div class="actions"><button id="retry" class="btn" type="button">Try another file</button></div>
+    </div>
+  </section>
+
+  <div></div>
+
+  <footer>
+    <details>
+      <summary>How does it work?</summary>
+      <p>GoodNotes exports every pen stroke as hundreds of tiny overlapping shapes. ShrinkNotes merges them into one clean outline per stroke. The handwriting stays vector, so it is sharp at any zoom. Other compressors turn your pages into images instead.</p>
+      <p>Everything runs in your browser. Nothing is uploaded.</p>
+    </details>
+    <span>Free &amp; open source · Not affiliated with GoodNotes</span>
+  </footer>
+</main>
+<script>/*__APP__*/</script>
