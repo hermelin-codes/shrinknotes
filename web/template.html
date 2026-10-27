@@ -114,6 +114,9 @@ h1 { font-weight: 800; font-size: clamp(34px, 8vw, 52px); line-height: 1.04; let
 
 /* ---- footer */
 footer { display: grid; gap: 8px; color: var(--pencil); font-size: 14px; }
+footer a { color: inherit; text-decoration: underline; text-decoration-color: var(--dot); text-underline-offset: 3px; }
+footer a:hover { color: var(--ink); text-decoration-color: currentColor; }
+footer a:focus-visible { outline: 3px solid var(--pen); outline-offset: 2px; border-radius: 3px; }
 details { max-width: 56ch; }
 summary { cursor: pointer; width: fit-content; text-decoration: underline; text-decoration-style: wavy; text-underline-offset: 4px; }
 summary:focus-visible { outline: 3px solid var(--pen); outline-offset: 2px; border-radius: 4px; }
@@ -190,7 +193,7 @@ details h3 + p { margin-top: 2px; }
       <p>Your PDF never leaves your device. It is processed in your browser and never uploaded.</p>
       <p>The site is hosted on Cloudflare Pages. To count visits it uses Cloudflare Web Analytics, which sets no cookies and doesn't build personal profiles. Like any web host, Cloudflare processes your IP address to deliver the page.</p>
     </details>
-    <span>Free &amp; open source · Not affiliated with GoodNotes</span>
+    <span>Free &amp; <a href="https://github.com/hermelin-codes/shrinknotes" target="_blank" rel="noopener">open source on GitHub</a> · Not affiliated with GoodNotes</span>
   </footer>
 </main>
 <script>/*__APP__*/</script>
