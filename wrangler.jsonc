@@ -1,9 +1,0 @@
-// Cloudflare Workers deployment: serves the built site from ./dist as static assets.
-{
-  "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "shrinknotes",
-  "compatibility_date": "2026-10-13",
-  "assets": {
-    "directory": "./dist"
-  }
-}
