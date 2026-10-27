@@ -16,7 +16,8 @@ let lastResult = null;
 
 function setProgress(frac, label) {
   const pct = Math.max(0, Math.min(100, Math.round(frac * 100)));
-  $('bar-fill').style.strokeDashoffset = String(100 - pct);
+  // the pen line is revealed left to right by widening its clip rectangle (viewBox is 400 wide)
+  $('bar-fill').setAttribute('width', String(pct === 0 ? 0 : 6 + pct * 4.06));
   $('bar').setAttribute('aria-valuenow', String(pct));
   $('pct').textContent = pct + '%';
   if (label) $('phase').textContent = label;
