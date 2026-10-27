@@ -17,18 +17,7 @@
   --shadow: 0 1px 0 rgba(80, 60, 30, .06), 0 10px 24px -12px rgba(80, 60, 30, .35);
   --font-hand: "Shantell Sans", "Comic Neue", "Chalkboard SE", ui-rounded, system-ui, sans-serif;
   --font-mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --desk: #1d1915; --paper: #27221c; --dot: #463c30; --ink: #f3ead9; --pencil: #b4a690;
-    --pen: #8eaeff; --pen-ink: #1d1915; --marker: rgba(255, 214, 64, .38); --tape: rgba(120, 104, 78, .6);
-    --shadow: 0 1px 0 rgba(0,0,0,.3), 0 14px 30px -14px rgba(0,0,0,.8); color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --desk: #1d1915; --paper: #27221c; --dot: #463c30; --ink: #f3ead9; --pencil: #b4a690;
-  --pen: #8eaeff; --pen-ink: #1d1915; --marker: rgba(255, 214, 64, .38); --tape: rgba(120, 104, 78, .6);
-  --shadow: 0 1px 0 rgba(0,0,0,.3), 0 14px 30px -14px rgba(0,0,0,.8); color-scheme: dark;
+  color-scheme: light;   /* paper is always paper: one light theme, also when the device is in dark mode */
 }
 
 * { box-sizing: border-box; }
