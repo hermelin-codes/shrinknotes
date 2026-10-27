@@ -1,60 +1,83 @@
 # ShrinkNotes
 
-Compress PDF exports from GoodNotes **without rasterizing the handwriting**. Runs entirely in the browser, nothing is uploaded.
+**Compress your GoodNotes PDF without turning your handwriting into pixels.**
 
-| File | Before | After |
+Exported a notebook from GoodNotes and got a 100 MB PDF that's too big to email, upload or share? ShrinkNotes makes it a fraction of the size, and your handwriting stays sharp at any zoom.
+
+| Example | Before | After |
 |---|---|---|
 | Statistics formula sheet, 4 pages | 116.3 MB | 9.8 MB |
 | Mechanics formula sheet, 2 pages | 61.8 MB | 4.7 MB |
 
-## Why GoodNotes PDFs are huge
+## How to use it
 
-GoodNotes exports every pen stroke as a chain of small, overlapping filled shapes ("stamps"), roughly one per stylus sample, each built from about ten Bézier curves with 7-digit coordinates. Two pages of notes easily contain 300,000+ of these shapes. Generic PDF compressors can only recompress the bytes or rasterize the pages, which makes handwriting blurry when you zoom in.
+1. In GoodNotes, export your notebook or pages as **PDF**.
+2. Open ShrinkNotes and drop the PDF onto the page (or tap to pick it).
+3. Save the smaller PDF.
 
-## How it works
+Works on iPad, Mac, Windows and Linux in any current browser.
 
-1. Parse the PDF (pdf-lib) and pick the large Flate-compressed page content streams and form XObjects.
-2. Inflate each stream and run a single-pass lexer over it. Everything that is not a filled path is copied byte for byte.
-3. For each filled path (one stroke): flatten the Béziers (Wang's formula, 0.006 pt tolerance), union all subpaths with the **same fill rule the PDF uses** (Clipper2, nonzero / even-odd), simplify the outline (Douglas–Peucker, 0.02 pt) and write it back with 2-decimal coordinates.
-4. Deflate (level 9) and write the new PDF. A stream is only replaced if it got smaller; streams with inline images are left untouched.
+## Your notes stay on your device
 
-Streams are processed in parallel Web Workers (max. 2 on iPad because of Safari's memory limit). Rendered at 600 dpi, the output differs from the original only in a few dozen anti-aliasing pixels per page.
+Your file is never uploaded. All the work happens inside your browser, so ShrinkNotes never sees your notes. The page sets no cookies, has no tracking and loads nothing from third parties.
 
-## Development
+## Why are GoodNotes PDFs so big?
 
-```sh
-npm install
-npm run build                          # → dist/index.html, one self-contained file
-npm run shrink -- in.pdf out.pdf       # shrink a file in Node (worker_threads)
-npm run test:browser -- in.pdf out.pdf # end-to-end test in headless Chromium (needs playwright)
-```
+GoodNotes exports every pen stroke as a chain of tiny overlapping shapes, roughly one for every point your pencil recorded. Two pages of notes can easily contain over 300,000 of them.
 
-## Deploy
+Most PDF compressors fix this by turning each page into an image. The file gets smaller, but your handwriting turns blurry as soon as you zoom in. ShrinkNotes instead merges the tiny shapes of each stroke into one clean outline. The result is still vector, so it looks the same as before.
 
-`dist/index.html` is the whole site. On Cloudflare Pages use build command `npm run build` and output directory `dist`.
+Everything else in your PDF (typed text, pictures, imported slides, backgrounds) is copied over unchanged.
 
-## Project layout
+## FAQ
+
+**Will it change how my notes look?**
+No. At 600 dpi, the shrunk file differs from the original in only a few dozen edge pixels per page, invisible to the eye.
+
+**My PDF didn't get smaller.**
+ShrinkNotes is built for handwritten notes. PDFs that are mostly photos or scanned pages don't contain pen strokes it can merge. If you think your file should work, please open an issue.
+
+**Is it free?**
+Yes, and open source.
+
+## How it works (for developers)
+
+1. Parse the PDF with pdf-lib and pick the large page content streams and form XObjects.
+2. Inflate each stream and run a single-pass lexer over it. Everything that isn't a filled path is copied byte for byte.
+3. For each filled path (one pen stroke): flatten the Bézier curves, merge all overlapping shapes with the same fill rule the PDF uses (Clipper2), simplify the outline (Douglas–Peucker, 0.02 pt) and write it back with two decimals.
+4. Deflate and write the new PDF. A stream is only replaced if it actually got smaller.
+
+Streams are processed in parallel Web Workers.
 
 ```
 src/content.js       content-stream lexer and rewriter
-src/geometry.js      flatten → union → simplify for one stroke
+src/geometry.js      flatten → merge → simplify for one stroke
 src/stream.js        inflate → rewrite → deflate for one stream
-src/pdf.js           PDF-level orchestration (pdf-lib)
-src/runner.js        Web Worker pool with main-thread fallback
-src/worker-entry.js  worker script
+src/pdf.js           PDF-level orchestration
+src/runner.js        Web Worker pool
 src/app.js           UI
-web/template.html    page markup and styles
+web/template.html    markup and styles
 build.mjs            bundles everything into dist/index.html
 ```
 
-## Dependencies
+### Run it locally
 
-- [pdf-lib](https://github.com/Hopding/pdf-lib) (MIT): PDF parsing and writing
-- [clipper2-ts](https://www.npmjs.com/package/clipper2-ts) (BSL-1.0): polygon union
-- [fflate](https://github.com/101arrowz/fflate) (MIT): inflate/deflate
-- [esbuild](https://esbuild.github.io) (MIT): build
-- Fonts [Shantell Sans](https://github.com/arrowtype/shantell-sans) and [DM Mono](https://github.com/googlefonts/dm-mono) (SIL OFL 1.1) via Fontsource, inlined into the page so no third-party requests are made
+```sh
+npm install
+npm run build                     # → dist/index.html, open it in a browser
+npm run shrink -- in.pdf out.pdf  # shrink a file from the command line
+```
+
+## Contributing
+
+Found a GoodNotes PDF that doesn't shrink or comes out wrong? Please open an issue. If you can, attach the file or describe which pens and features (highlighter, shapes, images) it uses.
+
+## Credits
+
+Built with [pdf-lib](https://github.com/Hopding/pdf-lib), [Clipper2](https://www.npmjs.com/package/clipper2-ts), [fflate](https://github.com/101arrowz/fflate) and [esbuild](https://esbuild.github.io). Fonts: [Shantell Sans](https://github.com/arrowtype/shantell-sans) and [DM Mono](https://github.com/googlefonts/dm-mono) (SIL Open Font License).
 
 ## License
 
-MIT. Not affiliated with GoodNotes.
+MIT
+
+ShrinkNotes is an independent project and is not affiliated with GoodNotes.
