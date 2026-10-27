@@ -19,7 +19,7 @@ Works on iPad, Mac, Windows and Linux in any current browser.
 
 ## Your notes stay on your device
 
-Your file is never uploaded. All the work happens inside your browser, so ShrinkNotes never sees your notes. The page sets no cookies, has no tracking and loads nothing from third parties.
+Your file is never uploaded. All the work happens inside your browser, so ShrinkNotes never sees your notes. The page sets no cookies. Visits are counted with Cloudflare Web Analytics, which works without cookies and without personal profiles.
 
 ## Why are GoodNotes PDFs so big?
 
