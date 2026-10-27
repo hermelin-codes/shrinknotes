@@ -2,6 +2,8 @@
 
 **Compress your GoodNotes PDF without turning your handwriting into pixels.**
 
+👉 **Try it: [shrinknotes.pages.dev](https://shrinknotes.pages.dev)**
+
 Exported a notebook from GoodNotes and got a 100 MB PDF that's too big to email, upload or share? ShrinkNotes makes it a fraction of the size, and your handwriting stays sharp at any zoom.
 
 | Example | Before | After |
