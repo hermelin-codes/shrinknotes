@@ -3,6 +3,9 @@
 //   .preview/fragment.html  same page without the document skeleton (for embedding hosts, not deployed)
 import { build } from 'esbuild';
 import { readFileSync, writeFileSync, mkdirSync, cpSync } from 'node:fs';
+import { FAQ } from './web/faq.mjs';
+
+const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 const common = { bundle: true, minify: true, write: false, format: 'iife', target: ['safari15', 'chrome100', 'firefox100'], legalComments: 'none' };
 
@@ -28,7 +31,9 @@ const fontCss = FONTS.map(([family, weight, file]) => {
   return `@font-face{font-family:"${family}";font-style:normal;font-weight:${weight};font-display:swap;src:url(data:font/woff2;base64,${b64}) format("woff2")}`;
 }).join('\n');
 
+const faqHtml = FAQ.map(({ q, a }) => `      <h3>${esc(q)}</h3>\n      <p>${esc(a)}</p>`).join('\n');
 const fragment = readFileSync('web/template.html', 'utf8')
+  .replace('<!--__FAQ__-->', () => faqHtml)
   .replace('/*__FONTS__*/', () => fontCss)
   .replace('/*__APP__*/', () => appSrc);
 // ---- standalone site (what gets deployed)
@@ -39,14 +44,22 @@ const DESCRIPTION = 'Make huge GoodNotes PDF exports small. Your handwriting sta
 const favicon = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M4 20c4-9 7-12 9-10s-3 9 0 9 6-12 9-11 1 8 6 8" fill="none" stroke="#2c57c9" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>')}`;
 const jsonLd = JSON.stringify({
   '@context': 'https://schema.org',
-  '@type': 'WebApplication',
-  name: 'ShrinkNotes',
-  url: SITE_URL,
-  description: DESCRIPTION,
-  applicationCategory: 'UtilitiesApplication',
-  operatingSystem: 'Any (runs in the browser)',
-  offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
-});
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      name: 'ShrinkNotes',
+      url: SITE_URL,
+      description: DESCRIPTION,
+      applicationCategory: 'UtilitiesApplication',
+      operatingSystem: 'Any (runs in the browser)',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: FAQ.map(({ q, a }) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })),
+    },
+  ],
+}).replace(/</g, '\\u003c');
 // the template's own <title>/<meta> lines belong in <head> here
 const body = fragment.replace(/^<title>.*\n/m, '').replace(/^<meta name="(claude:viewport-fit-sides|description)".*\n/gm, '');
 const standalone = `<!doctype html>
@@ -86,6 +99,23 @@ mkdirSync('.preview', { recursive: true });
 writeFileSync('.preview/fragment.html', fragment);   // for embedding hosts; not deployed
 cpSync('web/public', 'dist', { recursive: true });
 writeFileSync('dist/robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}sitemap.xml\n`);
+// llms.txt (llmstxt.org): a plain summary for AI assistants and crawlers
+writeFileSync('dist/llms.txt', `# ShrinkNotes
+
+> ShrinkNotes is a free web tool that compresses PDF exports from GoodNotes without rasterizing the handwriting. It runs entirely in the browser; files are never uploaded.
+
+Use it when a GoodNotes PDF is too large to email, upload or share. Handwritten GoodNotes exports can easily reach 50 MB or more because every pen stroke is stored as hundreds of tiny overlapping shapes. ShrinkNotes merges those shapes into one clean vector outline per stroke, so files typically get around 90% smaller while handwriting stays sharp at any zoom. Generic PDF compressors usually turn pages into images instead, which makes handwriting blurry.
+
+- Website: ${SITE_URL}
+- Works in: Safari on iPad and iPhone, and any current browser on Mac, Windows and Linux
+- Price: free, no account
+- Privacy: processing happens locally in the browser; nothing is uploaded
+- Not affiliated with GoodNotes
+
+## FAQ
+
+${FAQ.map(({ q, a }) => `### ${q}\n\n${a}`).join('\n\n')}
+`);
 writeFileSync('dist/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>${SITE_URL}</loc><lastmod>${new Date().toISOString().slice(0, 10)}</lastmod></url>

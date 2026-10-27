@@ -118,6 +118,8 @@ details { max-width: 56ch; }
 summary { cursor: pointer; width: fit-content; text-decoration: underline; text-decoration-style: wavy; text-underline-offset: 4px; }
 summary:focus-visible { outline: 3px solid var(--pen); outline-offset: 2px; border-radius: 4px; }
 details p { margin: 8px 0 0; }
+details h3 { font-size: 15px; font-weight: 600; color: var(--ink); margin: 14px 0 0; }
+details h3 + p { margin-top: 2px; }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
@@ -178,6 +180,10 @@ details p { margin: 8px 0 0; }
       <summary>How does it work?</summary>
       <p>GoodNotes exports every pen stroke as hundreds of tiny overlapping shapes. ShrinkNotes merges them into one clean outline per stroke. The handwriting stays vector, so it is sharp at any zoom. Other compressors turn your pages into images instead.</p>
       <p>Everything runs in your browser. Nothing is uploaded.</p>
+    </details>
+    <details>
+      <summary>FAQ</summary>
+<!--__FAQ__-->
     </details>
     <details>
       <summary>Privacy</summary>
