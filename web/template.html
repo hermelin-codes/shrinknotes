@@ -66,6 +66,8 @@ h1 { font-weight: 800; font-size: clamp(34px, 8vw, 52px); line-height: 1.04; let
 #drop:focus-within { outline: 3px solid var(--pen); outline-offset: 4px; }
 .big { font-weight: 800; font-size: 26px; line-height: 1.15; }
 .small { color: var(--pencil); font-size: 15px; }
+.or { display: flex; align-items: center; gap: 10px; color: var(--pencil); font-size: 15px; background: var(--paper); padding: 0 6px; }
+.or::before, .or::after { content: ""; width: 26px; height: 2px; border-radius: 2px; background: var(--dot); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 .btn {
@@ -79,7 +81,7 @@ h1 { font-weight: 800; font-size: clamp(34px, 8vw, 52px); line-height: 1.04; let
 .btn:hover { transform: rotate(-1.5deg); }
 .btn:focus-visible { outline: 3px solid var(--pen); outline-offset: 3px; }
 .btn-pen { background: var(--pen); border-color: var(--pen); color: var(--pen-ink); }
-.fake { pointer-events: none; margin-top: 6px; }
+.fake { pointer-events: none; }
 .link { appearance: none; background: none; border: 0; padding: 6px 2px; cursor: pointer; font: inherit; color: var(--pencil); text-decoration: underline; text-decoration-style: wavy; text-underline-offset: 4px; }
 .link:hover { color: var(--ink); }
 .link:focus-visible { outline: 3px solid var(--pen); outline-offset: 2px; border-radius: 4px; }
@@ -148,6 +150,7 @@ details h3 + p { margin-top: 2px; }
       <label id="drop" for="file">
         <input id="file" class="sr" type="file" accept="application/pdf,.pdf" multiple>
         <span class="big">Drop your PDFs here</span>
+        <span class="or" aria-hidden="true">or</span>
         <span class="btn btn-pen fake" aria-hidden="true">Choose PDFs</span>
       </label>
     </div>
