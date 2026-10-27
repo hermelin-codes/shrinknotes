@@ -57,6 +57,7 @@ const standalone = `<!doctype html>
 <title>${TITLE}</title>
 <meta name="description" content="${DESCRIPTION}">
 <link rel="canonical" href="${SITE_URL}">
+<meta name="google-site-verification" content="r7uLQ8P6uCxjhFmRTjHVPOYxPbBk2Y86NVCqoM9Z-tU">
 <link rel="icon" href="${favicon}">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="theme-color" content="#f3ead9">
