@@ -78,7 +78,7 @@ function fail(msg) {
     const a = document.createElement('a');
     a.href = OTHER_COMPRESSOR; a.target = '_blank'; a.rel = 'noopener';
     a.textContent = 'a general PDF compressor';
-    el.append(' For other PDFs, try ', a, '.');
+    el.append(' Maybe try ', a, '.');
   }
   show('view-error');
 }
