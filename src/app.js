@@ -68,8 +68,18 @@ function show(view) {
   for (const v of ['view-idle', 'view-work', 'view-done', 'view-multi', 'view-error']) $(v).hidden = v !== view;
 }
 
+// For PDFs without handwriting, point to a general-purpose compressor (also runs in the browser).
+const OTHER_COMPRESSOR = 'https://opentoolkit.github.io/CompressPDF/';
+
 function fail(msg) {
-  $('error-msg').textContent = msg;
+  const el = $('error-msg');
+  el.textContent = msg;
+  if (msg === MSG_NOTHING) {
+    const a = document.createElement('a');
+    a.href = OTHER_COMPRESSOR; a.target = '_blank'; a.rel = 'noopener';
+    a.textContent = 'a general PDF compressor';
+    el.append(' For other PDFs, try ', a, '.');
+  }
   show('view-error');
 }
 
