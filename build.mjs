@@ -41,10 +41,16 @@ const SITE_URL = 'https://shrinknotes.pages.dev/';
 const TITLE = 'ShrinkNotes – Compress GoodNotes PDFs without losing quality';
 const DESCRIPTION = 'Make huge GoodNotes PDF exports small. Your handwriting stays sharp vector, and the file never leaves your device. Free, runs in your browser.';
 
-const favicon = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M4 20c4-9 7-12 9-10s-3 9 0 9 6-12 9-11 1 8 6 8" fill="none" stroke="#2c57c9" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>')}`;
 const jsonLd = JSON.stringify({
   '@context': 'https://schema.org',
   '@graph': [
+    {
+      // tells Google the site name to show above the search result (instead of the host)
+      '@type': 'WebSite',
+      name: 'ShrinkNotes',
+      alternateName: 'ShrinkNotes – GoodNotes PDF compressor',
+      url: SITE_URL,
+    },
     {
       '@type': 'WebApplication',
       name: 'ShrinkNotes',
@@ -72,7 +78,9 @@ const standalone = `<!doctype html>
 <link rel="canonical" href="${SITE_URL}">
 <meta name="google-site-verification" content="r7uLQ8P6uCxjhFmRTjHVPOYxPbBk2Y86NVCqoM9Z-tU">
 <meta name="msvalidate.01" content="558043649259DF86A80A1F4F68D1CA2B">
-<link rel="icon" href="${favicon}">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-96.png" type="image/png" sizes="96x96">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="theme-color" content="#f3ead9">
 <meta property="og:type" content="website">

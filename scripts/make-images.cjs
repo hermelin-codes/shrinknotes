@@ -34,6 +34,8 @@ const og = `<style>${css}</style>
 const icon = `<style>${css}</style>
 <div style="width:180px;height:180px;background:#fffaf0;display:grid;place-items:center;background-image:radial-gradient(#d9cbb0 1.4px,transparent 1.8px);background-size:18px 18px;background-position:9px 9px">${pen(132)}</div>`;
 
+const favSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" rx="11" fill="#fffaf0"/><path d="M8 30c5-12 9-16 12-13.5S16 29 20 29s8-16 12-14.5 1 10.5 8 10.5" fill="none" stroke="#2c57c9" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
 (async () => {
   const out = path.join(__dirname, '../web/public');
   const b = await chromium.launch();
@@ -43,6 +45,13 @@ const icon = `<style>${css}</style>
   await p.setViewportSize({ width: 180, height: 180 });
   await p.setContent(icon);
   await p.screenshot({ path: path.join(out, 'apple-touch-icon.png') });
+  fs.writeFileSync(path.join(out, 'favicon.svg'), favSvg);
+  for (const size of [16, 32, 48, 96]) {
+    await p.setViewportSize({ width: size, height: size });
+    await p.setContent(`<style>*{margin:0}body{background:transparent}</style><img src="data:image/svg+xml,${encodeURIComponent(favSvg)}" width="${size}" height="${size}" style="display:block">`);
+    await p.screenshot({ path: path.join(__dirname, `../.preview/fav-${size}.png`), omitBackground: true });
+  }
+  fs.copyFileSync(path.join(__dirname, '../.preview/fav-96.png'), path.join(out, 'favicon-96.png'));
   await b.close();
-  console.log('wrote web/public/og.png and apple-touch-icon.png');
+  console.log('wrote web/public/og.png, apple-touch-icon.png, favicon.svg, favicon-96.png (+ .preview/fav-*.png for favicon.ico)');
 })();

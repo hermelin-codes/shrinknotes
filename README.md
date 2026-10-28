@@ -68,7 +68,7 @@ build.mjs            bundles everything into dist/index.html
 npm install
 npm run build                     # → dist/index.html, open it in a browser
 npm run shrink -- in.pdf out.pdf  # shrink a file from the command line
-node scripts/make-images.cjs      # regenerate the preview image and icon (needs playwright)
+node scripts/make-images.cjs      # regenerate preview image and icons (needs playwright; favicon.ico via Pillow)
 ```
 
 ## Contributing
