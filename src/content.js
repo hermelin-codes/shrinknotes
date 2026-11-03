@@ -126,7 +126,8 @@ export function rewriteContent(src, onProgress) {
     const arity = PATH_ARITY[op];
     if (arity !== undefined && len <= 1) {
       if (pathStart < 0) pathStart = opStart;
-      if (nOps !== arity || complexOperand) pathOk = false;
+      // a path must start with m; anything else has no defined start point
+      if (nOps !== arity || complexOperand || (pathOps.length === 0 && op !== 'm')) pathOk = false;
       else {
         pathOps.push(PATH_CODE[op]);
         for (let k = 0; k < arity; k++) pathNums.push(nums[k]);
@@ -161,8 +162,10 @@ export function rewriteContent(src, onProgress) {
             }
             out.ascii(' h');
           }
-          out.byte(10);
-          out.ascii(op === 'f*' ? 'f*' : 'f');      // Clipper output is valid for both rules
+          if (rings.length) {                         // a lone f without a path is invalid; an empty outline paints nothing
+            out.byte(10);
+            out.ascii(op === 'f*' ? 'f*' : 'f');      // Clipper output is valid for both rules
+          }
           done = true;
         }
       }

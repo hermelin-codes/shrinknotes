@@ -13,15 +13,19 @@ function poolSize(jobCount) {
 
 export function createRunner(jobCount, onProgress) {
   let workers = [];
+  let url = null;
   try {
-    const url = URL.createObjectURL(new Blob([__WORKER_SOURCE__], { type: 'text/javascript' }));
+    url = URL.createObjectURL(new Blob([__WORKER_SOURCE__], { type: 'text/javascript' }));
     const n = poolSize(jobCount);
     for (let i = 0; i < n; i++) workers.push(new Worker(url));
   } catch {
+    for (const w of workers) w.terminate();
     workers = [];
   }
+  const revoke = () => { if (url) URL.revokeObjectURL(url); url = null; };
 
   if (workers.length === 0) {
+    revoke();
     // Main-thread fallback: one stream at a time, yielding so the UI can paint.
     let chain = Promise.resolve();
     return {
@@ -41,7 +45,11 @@ export function createRunner(jobCount, onProgress) {
     while (idle.length && queue.length) {
       const w = idle.pop();
       const job = queue.shift();
-      w.postMessage({ id: job.id, raw: job.raw }, [job.raw.buffer]);
+      // copy the stream bytes only now, so the transfer does not detach pdf-lib's
+      // buffer and only the streams being worked on are held twice in memory
+      const raw = job.raw.slice();
+      job.raw = null;
+      w.postMessage({ id: job.id, raw }, [raw.buffer]);
       w._job = job;
     }
   };
@@ -63,8 +71,7 @@ export function createRunner(jobCount, onProgress) {
   }
   return {
     threads: workers.length,
-    // copy the stream bytes so the transfer does not detach pdf-lib's buffer
-    run: (raw, id) => new Promise((resolve) => { pending.set(id, resolve); queue.push({ id, raw: raw.slice() }); pump(); }),
-    close() { for (const w of workers) w.terminate(); },
+    run: (raw, id) => new Promise((resolve) => { pending.set(id, resolve); queue.push({ id, raw }); pump(); }),
+    close() { for (const w of workers) w.terminate(); revoke(); },
   };
 }

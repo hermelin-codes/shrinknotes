@@ -3,6 +3,7 @@
 //   .preview/fragment.html  same page without the document skeleton (for embedding hosts, not deployed)
 import { build } from 'esbuild';
 import { readFileSync, writeFileSync, mkdirSync, cpSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { FAQ } from './web/faq.mjs';
 
 const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -107,6 +108,27 @@ writeFileSync('dist/index.html', standalone);
 mkdirSync('.preview', { recursive: true });
 writeFileSync('.preview/fragment.html', fragment);   // for embedding hosts; not deployed
 cpSync('web/public', 'dist', { recursive: true });
+// Cloudflare Pages response headers. The CSP allows no network requests except the
+// Cloudflare Web Analytics beacon, so the browser itself enforces that files are never uploaded.
+const appHash = createHash('sha256').update(appSrc).digest('base64');
+const csp = [
+  "default-src 'none'",
+  `script-src 'sha256-${appHash}' https://static.cloudflareinsights.com`,
+  "style-src 'unsafe-inline'",
+  'font-src data:',
+  "img-src 'self'",
+  "connect-src 'self' https://cloudflareinsights.com",
+  'worker-src blob:',
+  'child-src blob:',          // Safari < 15.5 reads child-src for workers
+  "base-uri 'none'",
+  "form-action 'none'",
+  "frame-ancestors 'none'",
+].join('; ');
+writeFileSync('dist/_headers', `/*
+  Content-Security-Policy: ${csp}
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+`);
 writeFileSync('dist/robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}sitemap.xml\n`);
 // llms.txt (llmstxt.org): a plain summary for AI assistants and crawlers
 writeFileSync('dist/llms.txt', `# ShrinkNotes
