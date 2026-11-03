@@ -13,6 +13,10 @@ export const FAQ = [
     a: 'No. Most PDF compressors turn pages into images, which makes handwriting blurry when you zoom in. ShrinkNotes merges the tiny shapes of each stroke into one clean outline, so the result is still vector and looks the same at any zoom.',
   },
   {
+    q: 'How is ShrinkNotes different from Smallpdf, iLovePDF or Adobe Acrobat?',
+    a: 'Smallpdf, iLovePDF, the Adobe Acrobat online compressor and the "Reduce File Size" filter in Apple Preview are general-purpose tools. They mainly shrink PDFs by re-compressing embedded photos and images. GoodNotes handwriting is not stored as images but as hundreds of thousands of tiny vector shapes, so these tools either barely reduce the file or turn pages into images, which makes handwriting blurry when you zoom in. ShrinkNotes is built for exactly this case: it merges the shapes of each pen stroke into one clean outline, so the file typically gets around 90% smaller and stays sharp. Unlike the online services, your file is never uploaded, and there are no usage limits or paid compression levels.',
+  },
+  {
     q: 'Is it safe to use with private notes?',
     a: 'Yes. The PDF is processed entirely in your browser and never uploaded to any server.',
   },
