@@ -2,17 +2,19 @@
 import { zipSync } from 'fflate';
 import { shrinkPdf } from './pdf.js';
 import { createRunner } from './runner.js';
+import { STRINGS } from './i18n.js';
 
+const T = STRINGS[document.documentElement.lang.slice(0, 2)] || STRINGS.en;
 const $ = (id) => document.getElementById(id);
-const fmtMB = (b) => (b / 1e6).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' MB';
-const fmtSec = (ms) => (ms / 1000).toLocaleString('en-US', { maximumFractionDigits: ms < 10000 ? 1 : 0 }) + ' s';
-const pctSmaller = (before, after) => Math.round((1 - after / before) * 100) + '% smaller';
-const smallName = (name) => name.replace(/\.pdf$/i, '') + ' (small).pdf';
+const fmtMB = (b) => (b / 1e6).toLocaleString(T.locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' MB';
+const fmtSec = (ms) => (ms / 1000).toLocaleString(T.locale, { maximumFractionDigits: ms < 10000 ? 1 : 0 }) + ' s';
+const pctSmaller = (before, after) => T.smaller(Math.round((1 - after / before) * 100));
+const smallName = (name) => name.replace(/\.pdf$/i, '') + T.smallSuffix + '.pdf';
 const isPdf = (f) => /\.pdf$/i.test(f.name) || f.type === 'application/pdf';
 
-const MSG_NOT_PDF = "That's not a PDF. Export your notebook from GoodNotes as a PDF and pick that file.";
-const MSG_NOTHING = "Nothing to shrink here. ShrinkNotes is made for handwritten GoodNotes notes, and this PDF doesn't seem to contain any.";
-const MSG_UNREADABLE = "This file couldn't be read. Is it an unchanged PDF export from GoodNotes?";
+const MSG_NOT_PDF = T.notPdf;
+const MSG_NOTHING = T.nothing;
+const MSG_UNREADABLE = T.unreadable;
 
 let downloadsCap = null;
 if (window.claude && typeof window.claude.use === 'function') {
@@ -36,19 +38,19 @@ async function shrinkFile(file, onProgress) {
     onProgress(0.04 + 0.92 * s / (t || 1));
   };
   try {
-    onProgress(0.01, 'Reading file…');
+    onProgress(0.01, T.reading);
     const bytes = new Uint8Array(await file.arrayBuffer());
-    onProgress(0.03, 'Looking inside…');
+    onProgress(0.03, T.looking);
     await new Promise((r) => setTimeout(r, 20));
     const { bytes: out, totals } = await shrinkPdf(bytes, (raw, id) => runner.run(raw, id), (e) => {
       if (e.type === 'plan') {
         e.streams.forEach((size, i) => { weights[i] = size; done[i] = 0; });
         runner = createRunner(e.streams.length, (id, f) => { done[id] = f * 0.85; report(); });
-        onProgress(0.04, 'Merging pen strokes…');
+        onProgress(0.04, T.merging);
       } else if (e.type === 'done' || e.type === 'skip') {
         done[e.id] = 1; report();
       } else if (e.type === 'saving') {
-        onProgress(0.97, 'Writing the new PDF…');
+        onProgress(0.97, T.writing);
       }
     });
     if (totals.replaced === 0 || out.length >= file.size) throw new ShrinkError(MSG_NOTHING);
@@ -77,8 +79,8 @@ function fail(msg) {
   if (msg === MSG_NOTHING) {
     const a = document.createElement('a');
     a.href = OTHER_COMPRESSOR; a.target = '_blank'; a.rel = 'noopener';
-    a.textContent = 'a general PDF compressor';
-    el.append(' Maybe try ', a, '.');
+    a.textContent = T.tryLink;
+    el.append(T.tryBefore, a, T.tryAfter);
   }
   show('view-error');
 }
@@ -108,7 +110,7 @@ async function handleOne(file) {
     $('done-before').textContent = fmtMB(file.size);
     $('done-after').textContent = fmtMB(out.length);
     $('done-saving').textContent = pctSmaller(file.size, out.length);
-    $('done-detail').textContent = `in ${fmtSec(ms)}`;
+    $('done-detail').textContent = T.took(fmtSec(ms));
     $('save-note').textContent = '';
     show('view-done');
     $('save').focus();
@@ -147,7 +149,7 @@ async function handleMany(files) {
   const rows = files.map((f) => ({ file: f, row: makeRow(f) }));
   let before = 0, after = 0;
   for (const { file, row } of rows) {
-    if (!isPdf(file)) { row.set('error', 'Not a PDF, skipped'); continue; }
+    if (!isPdf(file)) { row.set('error', T.rowNotPdf); continue; }
     row.set('working', fmtMB(file.size));
     try {
       const { out } = await shrinkFile(file, (frac) => drawLine(row.rect, frac));
@@ -156,11 +158,11 @@ async function handleMany(files) {
       before += file.size; after += out.length;
       row.set('done', `${fmtMB(file.size)} → ${fmtMB(out.length)}`);
       const btn = document.createElement('button');
-      btn.type = 'button'; btn.className = 'link row-save'; btn.textContent = 'Save';
+      btn.type = 'button'; btn.className = 'link row-save'; btn.textContent = T.rowSave;
       btn.addEventListener('click', () => saveFile(out, name, 'application/pdf', $('multi-note')));
       row.li.querySelector('.row-top').appendChild(btn);
     } catch (err) {
-      row.set('error', err.message === MSG_NOTHING ? 'Nothing to shrink, skipped' : "Couldn't read this file");
+      row.set('error', err.message === MSG_NOTHING ? T.rowNothing : T.rowUnreadable);
     }
   }
 
@@ -196,9 +198,9 @@ async function saveFile(bytes, name, type, noteEl) {
   if (downloadsCap) {
     try {
       await downloadsCap.save({ filename: name, data: blob });
-      noteEl.textContent = 'Saved.';
+      noteEl.textContent = T.saved;
     } catch (e) {
-      noteEl.textContent = e && e.code === 'declined' ? 'Not saved.' : "Saving didn't work here.";
+      noteEl.textContent = e && e.code === 'declined' ? T.notSaved : T.saveFailed;
     }
     return;
   }

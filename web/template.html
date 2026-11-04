@@ -1,6 +1,6 @@
 <title>ShrinkNotes</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Compress GoodNotes PDFs without blurring your handwriting. Runs entirely in your browser.">
+<meta name="description" content="{{description}}">
 <style>
 /*__FONTS__*/
 /* Layout: one sheet of dotted notebook paper taped to a warm desk; everything else is a pen note around it. */
@@ -35,7 +35,8 @@ body {
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   display: grid; grid-template-rows: auto auto 1fr auto; gap: 28px;
 }
-.mark { font-weight: 800; font-size: 18px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; }
+.mark { font-weight: 800; font-size: 18px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; justify-self: start; color: inherit; text-decoration: none; }
+.mark:focus-visible { outline: 3px solid var(--pen); outline-offset: 3px; border-radius: 4px; }
 .mark svg { width: 24px; height: 24px; color: var(--pen); }
 h1 { font-weight: 800; font-size: clamp(34px, 8vw, 52px); line-height: 1.04; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
 .hl { background: linear-gradient(transparent 58%, var(--marker) 58%, var(--marker) 92%, transparent 92%); padding: 0 .08em; margin: 0 -.08em; }
@@ -129,6 +130,25 @@ summary:focus-visible { outline: 3px solid var(--pen); outline-offset: 2px; bord
 details p { margin: 8px 0 0; }
 details h3 { font-size: 15px; font-weight: 600; color: var(--ink); margin: 14px 0 0; }
 details h3 + p { margin-top: 2px; }
+.more a { margin-right: 2px; }
+
+/* ---- notes below the sheet (topic pages) */
+.notes { max-width: 60ch; min-width: 0; }   /* min-width: lets a wide table scroll instead of widening the page */
+.notes h2 { font-weight: 800; font-size: 24px; line-height: 1.2; letter-spacing: -0.01em; margin: 30px 0 8px; text-wrap: balance; }
+.notes h2:first-child { margin-top: 4px; }
+.notes h3 { font-weight: 600; font-size: 17px; margin: 18px 0 2px; }
+.notes p, .notes ul, .notes ol { margin: 0 0 12px; }
+.notes ul, .notes ol { padding-left: 1.3em; }
+.notes li { margin-bottom: 6px; }
+.notes li::marker { color: var(--pen); font-weight: 600; }
+.notes a { color: var(--pen); text-decoration: underline; text-underline-offset: 3px; }
+.notes a:focus-visible { outline: 3px solid var(--pen); outline-offset: 2px; border-radius: 3px; }
+.table { overflow-x: auto; margin: 4px 0 14px; }
+.notes table { border-collapse: collapse; min-width: 540px; font-size: 15px; line-height: 1.4; }
+.notes th, .notes td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 2px dotted var(--dot); }
+.notes thead th { font-weight: 800; }
+.notes tbody th { font-weight: 600; color: var(--pencil); }
+.notes td:last-child { font-weight: 600; }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
@@ -137,42 +157,42 @@ details h3 + p { margin-top: 2px; }
 </style>
 
 <main class="wrap">
-  <div class="mark">
+  <a class="mark" href="{{homeHref}}">
     <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M4 20c4-9 7-12 9-10s-3 9 0 9 6-12 9-11 1 8 6 8" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
     ShrinkNotes
-  </div>
+  </a>
 
   <header>
-    <h1>Compress your <span class="hl">GoodNotes</span> PDF.</h1>
-    <p class="sub">Your handwriting stays sharp. Your file never leaves your device.</p>
+    <h1>{{h1}}</h1>
+    <p class="sub">{{sub}}</p>
   </header>
 
   <section id="sheet" class="sheet" aria-live="polite">
     <div id="view-idle">
       <label id="drop" for="file">
         <input id="file" class="sr" type="file" accept="application/pdf,.pdf" multiple>
-        <span class="big">Drop your PDFs here</span>
-        <span class="or" aria-hidden="true">or</span>
-        <span class="btn btn-pen fake" aria-hidden="true">Choose PDFs</span>
+        <span class="big">{{drop}}</span>
+        <span class="or" aria-hidden="true">{{or}}</span>
+        <span class="btn btn-pen fake" aria-hidden="true">{{choose}}</span>
       </label>
     </div>
 
     <div id="view-work" class="panel" hidden>
       <p id="work-name" class="fname"></p>
-      <svg class="line" viewBox="0 0 400 26" preserveAspectRatio="none" role="progressbar" id="bar" aria-label="Progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <svg class="line" viewBox="0 0 400 26" preserveAspectRatio="none" role="progressbar" id="bar" aria-label="{{progress}}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
         <clipPath id="bar-clip"><rect id="bar-fill" x="-6" y="-10" width="0" height="46"/></clipPath>
         <path class="ink" clip-path="url(#bar-clip)" d="M3 14 C 60 4, 110 22, 170 13 S 290 6, 397 14" fill="none" stroke-width="4.5" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
       </svg>
-      <div class="status"><span id="phase">Reading file…</span><span id="pct" class="mono">0%</span></div>
+      <div class="status"><span id="phase">{{reading}}</span><span id="pct" class="mono">0%</span></div>
     </div>
 
     <div id="view-done" class="panel" hidden>
       <p id="done-name" class="fname"></p>
-      <p class="result"><s id="done-before"></s><span class="arrow" aria-label="to">→</span><span id="done-after"></span></p>
+      <p class="result"><s id="done-before"></s><span class="arrow" aria-label="{{to}}">→</span><span id="done-after"></span></p>
       <p class="smaller"><span id="done-saving" class="hl"></span> <span id="done-detail" class="note"></span></p>
       <div class="actions">
-        <button id="save" class="btn btn-pen" type="button">Save PDF</button>
-        <button id="again" class="link" type="button">Shrink another one</button>
+        <button id="save" class="btn btn-pen" type="button">{{savePdf}}</button>
+        <button id="again" class="link" type="button">{{again}}</button>
         <span id="save-note" class="note" role="status"></span>
       </div>
     </div>
@@ -181,41 +201,39 @@ details h3 + p { margin-top: 2px; }
       <ul id="multi-list" class="files"></ul>
       <p id="multi-sum" class="multi-sum" hidden></p>
       <div class="actions">
-        <button id="save-all" class="btn btn-pen" type="button" hidden>Save all as ZIP</button>
-        <button id="again-multi" class="link" type="button" hidden>Shrink more</button>
+        <button id="save-all" class="btn btn-pen" type="button" hidden>{{saveAll}}</button>
+        <button id="again-multi" class="link" type="button" hidden>{{shrinkMore}}</button>
         <span id="multi-note" class="note" role="status"></span>
       </div>
     </div>
 
     <div id="view-error" class="panel" hidden>
       <p id="error-msg" class="err"></p>
-      <div class="actions"><button id="retry" class="btn" type="button">Try another file</button></div>
+      <div class="actions"><button id="retry" class="btn" type="button">{{tryAnother}}</button></div>
     </div>
   </section>
 
-  <div></div>
+<!--__ARTICLE__-->
 
   <footer>
     <details>
-      <summary>How does it work?</summary>
-      <p>GoodNotes exports every pen stroke as hundreds of tiny overlapping shapes. ShrinkNotes merges them into one clean outline per stroke. The handwriting stays vector, so it is sharp at any zoom. Other compressors turn your pages into images instead.</p>
-      <p>Everything runs in your browser. Nothing is uploaded.</p>
+      <summary>{{howSummary}}</summary>
+      <p>{{howP1}}</p>
+      <p>{{howP2}}</p>
     </details>
-    <details>
-      <summary>FAQ</summary>
 <!--__FAQ__-->
-    </details>
     <details>
-      <summary>Privacy</summary>
-      <p>Your PDF never leaves your device. It is processed in your browser and never uploaded.</p>
-      <p>The site is hosted on Cloudflare Pages. To count visits it uses Cloudflare Web Analytics, which sets no cookies and doesn't build personal profiles. Like any web host, Cloudflare processes your IP address to deliver the page.</p>
+      <summary>{{privacySummary}}</summary>
+      <p>{{privacyP1}}</p>
+      <p>{{privacyP2}}</p>
     </details>
-    <span>Free &amp; <a href="https://github.com/hermelin-codes/shrinknotes" target="_blank" rel="noopener">open source on GitHub</a> · Not affiliated with GoodNotes</span>
+<!--__NAV__-->
+    <span>{{free}} <a href="https://github.com/hermelin-codes/shrinknotes" target="_blank" rel="noopener">{{github}}</a> · {{notAffiliated}} · <!--__LANG__--></span>
   </footer>
 </main>
 <template id="row-tpl">
   <li class="row" data-state="waiting">
-    <div class="row-top"><span class="row-name"></span><span class="row-info">Waiting…</span></div>
+    <div class="row-top"><span class="row-name"></span><span class="row-info">{{waiting}}</span></div>
     <svg class="line" viewBox="0 0 400 14" preserveAspectRatio="none" aria-hidden="true">
       <clipPath><rect x="-6" y="-10" width="0" height="34"/></clipPath>
       <path class="ink" d="M3 8 C 80 3, 150 12, 220 7 S 330 4, 397 8" fill="none" stroke-width="3.5" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
