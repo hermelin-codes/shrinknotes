@@ -64,7 +64,7 @@ export const STRINGS = {
     shrinkMore: 'Weitere verkleinern',
     tryAnother: 'Andere Datei versuchen',
     howSummary: 'Wie funktioniert das?',
-    howP1: 'GoodNotes exportiert jeden Strich als Hunderte winzige, überlappende Formen. ShrinkNotes fügt sie zu einer sauberen Kontur pro Strich zusammen. Die Handschrift bleibt Vektorgrafik und ist deshalb bei jedem Zoom scharf. Andere Kompressoren machen aus deinen Seiten stattdessen Bilder.',
+    howP1: 'Ein Strich besteht im GoodNotes-PDF aus Hunderten winziger Schnipsel. ShrinkNotes klebt sie wieder zu einer Linie zusammen. Die Datei wird kleiner, und die Schrift bleibt scharf, egal wie weit du reinzoomst. Andere Kompressoren machen aus deinen Seiten Bilder, und dann wird alles pixelig.',
     howP2: 'Alles läuft in deinem Browser. Nichts wird hochgeladen.',
     faqSummary: 'FAQ',
     faqHeading: 'Häufige Fragen',
