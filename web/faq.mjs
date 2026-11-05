@@ -61,7 +61,7 @@ export const FAQ = {
     },
     {
       q: 'Kann ich mehrere PDFs auf einmal verkleinern?',
-      a: 'Ja. Wähl mehrere PDFs aus oder zieh sie zusammen rein. Sie werden nacheinander verarbeitet, und du kannst jede Datei einzeln oder alle zusammen als ZIP speichern.',
+      a: 'Ja. Wähle mehrere PDFs aus oder zieh sie zusammen rein. Sie werden nacheinander verarbeitet, und du kannst jede Datei einzeln oder alle zusammen als ZIP speichern.',
     },
     {
       q: 'Funktioniert das auf dem iPad?',
