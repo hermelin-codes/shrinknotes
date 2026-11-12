@@ -132,6 +132,28 @@ function jsonLd(page) {
   }).replace(/</g, '\\u003c');
 }
 
+// Language detection, runs in <head> before anything is painted.
+// English pages (the x-default) send visitors whose browser prefers another available language
+// to that version of the same page. Pages in other languages never redirect, so crawlers
+// (which browse in English) still reach every version. Clicking a language link in the footer
+// stores the choice, and a stored choice beats the browser setting.
+const LANG_SCRIPT = `(function(){
+var K='lang',here=document.documentElement.lang;
+function get(){try{return localStorage.getItem(K)}catch(e){}}
+document.addEventListener('click',function(e){
+var a=e.target.closest&&e.target.closest('a[hreflang]');
+if(a)try{localStorage.setItem(K,a.getAttribute('hreflang'))}catch(e){}
+});
+if(here!=='en')return;
+var alt={};
+document.querySelectorAll('link[rel=alternate][hreflang]').forEach(function(l){alt[l.hreflang]=new URL(l.href).pathname});
+var want=get();
+if(!want){var ls=navigator.languages||[navigator.language||''];
+for(var i=0;i<ls.length;i++){var l=String(ls[i]).slice(0,2).toLowerCase();if(alt[l]){want=l;break}}}
+if(want&&want!==here&&alt[want])location.replace(alt[want]+location.search+location.hash);
+})();`;
+const langScriptHash = createHash('sha256').update(LANG_SCRIPT).digest('base64');
+
 function renderPage(page, fragment) {
   const ogTitle = page.ogTitle || page.title.replace(/ – ShrinkNotes$/, '');
   const ogDescription = page.ogDescription || page.description;
@@ -150,6 +172,7 @@ function renderPage(page, fragment) {
 <meta name="robots" content="max-image-preview:large">
 <link rel="canonical" href="${url(page)}">
 ${alternates.join('\n')}
+<script>${LANG_SCRIPT}</script>
 <meta name="google-site-verification" content="r7uLQ8P6uCxjhFmRTjHVPOYxPbBk2Y86NVCqoM9Z-tU">
 <meta name="msvalidate.01" content="558043649259DF86A80A1F4F68D1CA2B">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
@@ -203,7 +226,7 @@ for (const page of PAGES) {
 const appHash = createHash('sha256').update(appSrc).digest('base64');
 const csp = [
   "default-src 'none'",
-  `script-src 'sha256-${appHash}' https://static.cloudflareinsights.com`,
+  `script-src 'sha256-${appHash}' 'sha256-${langScriptHash}' https://static.cloudflareinsights.com`,
   "style-src 'unsafe-inline'",
   'font-src data:',
   "img-src 'self'",
