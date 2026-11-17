@@ -53,14 +53,14 @@ export const FAQ = {
     },
     {
       q: 'Was ist anders als bei Smallpdf, iLovePDF oder Adobe Acrobat?',
-      a: 'Smallpdf, iLovePDF, der Online-Kompressor von Adobe Acrobat und der Filter „Dateigröße reduzieren“ in der Vorschau-App auf dem Mac sind Allzweck-Tools. Sie machen PDFs vor allem kleiner, indem sie eingebettete Fotos und Bilder neu komprimieren. GoodNotes speichert Handschrift aber nicht als Bilder, sondern als Hunderttausende winzige Vektorformen. Diese Tools verkleinern die Datei deshalb kaum oder machen aus den Seiten Bilder, und dann wird die Handschrift beim Reinzoomen unscharf. ShrinkNotes ist genau für diesen Fall gebaut: Es setzt die Formen jedes Strichs wieder zu einer Linie zusammen. Die Datei wird so meist rund 90 % kleiner und bleibt scharf. Anders als bei den Online-Diensten wird deine Datei nie hochgeladen, und es gibt keine Nutzungslimits oder kostenpflichtigen Kompressionsstufen.',
+      a: 'Smallpdf, iLovePDF, der Online-Kompressor von Adobe Acrobat und der Filter „Dateigröße reduzieren“ in der Vorschau-App auf dem Mac sind Allzweck-Tools. Sie machen PDFs vor allem kleiner, indem sie eingebettete Fotos und Bilder neu komprimieren. GoodNotes speichert Handschrift aber nicht als Bilder, sondern als Hunderttausende winzige Vektorformen. Diese Tools komprimieren die Datei deshalb kaum oder machen aus den Seiten Bilder, und dann wird die Handschrift beim Reinzoomen unscharf. ShrinkNotes ist genau für diesen Fall gebaut: Es setzt die Formen jedes Strichs wieder zu einer Linie zusammen. Die Datei wird so meist rund 90 % kleiner und bleibt scharf. Anders als bei den Online-Diensten wird deine Datei nie hochgeladen, und es gibt keine Nutzungslimits oder kostenpflichtigen Kompressionsstufen.',
     },
     {
       q: 'Kann ich das bedenkenlos mit privaten Notizen nutzen?',
       a: 'Ja. Die PDF wird komplett in deinem Browser verarbeitet und nie auf einen Server hochgeladen.',
     },
     {
-      q: 'Kann ich mehrere PDFs auf einmal verkleinern?',
+      q: 'Kann ich mehrere PDFs auf einmal komprimieren?',
       a: 'Ja. Wähle mehrere PDFs aus oder zieh sie zusammen rein. Sie werden nacheinander verarbeitet, und du kannst jede Datei einzeln oder alle zusammen als ZIP speichern.',
     },
     {

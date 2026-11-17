@@ -42,7 +42,7 @@ const SITE_URL = 'https://shrinknotes.pages.dev/';
 const OG_LOCALE = { en: 'en_US', de: 'de_DE' };
 const OG_IMAGE_ALT = {
   en: 'ShrinkNotes: a 116.3 MB GoodNotes PDF shrunk to 9.8 MB',
-  de: 'ShrinkNotes: eine GoodNotes-PDF mit 116,3 MB, verkleinert auf 9,8 MB',
+  de: 'ShrinkNotes: eine GoodNotes-PDF mit 116,3 MB, komprimiert auf 9,8 MB',
 };
 
 const url = (p) => SITE_URL + p.path;
