@@ -37,6 +37,10 @@ export const FAQ = {
       q: 'Is it free?',
       a: 'Yes. No account, no upload limits, no watermark.',
     },
+    {
+      q: 'How it works (for techies)',
+      a: 'ShrinkNotes never touches pixels. It parses the PDF with pdf-lib, picks the large page content streams and form XObjects (Flate-only, at least 64 KB), inflates them with fflate and rewrites the decoded operator stream in a single pass with a custom lexer. Everything that is not a filled path (text, images, clip paths, rectangles) is copied byte for byte, and streams with inline images are left alone. GoodNotes draws each pen stroke as one path of many tiny overlapping subpaths, so for every fill operator the subpaths are collected, Bézier segments are flattened to polylines (Wang\'s formula, 0.006 pt tolerance), snapped to an integer grid of 0.001 pt (repeated and collinear points are dropped first, which also protects Clipper2 from an endless loop on coarsely rounded coordinates) and merged with a Clipper2 polygon union that uses the same fill rule as the original operator (nonzero or even-odd). The resulting outline is thinned out with Douglas-Peucker at 0.02 pt, written back as m/l/h/f operators with two decimals and deflated at level 9. A stream is only replaced if the result is actually smaller, and anything the lexer cannot parse cleanly stays untouched. The only loss is that 0.02 pt geometric tolerance: in 600 dpi comparisons, pages differ from the original in just a few dozen edge pixels. The streams are processed largest first, in parallel in a pool of Web Workers (up to 4, 2 on iOS, with a main-thread fallback) with transferable buffers, so everything stays in your browser. The code is MIT licensed and on GitHub: github.com/hermelin-codes/shrinknotes',
+    },
   ],
   de: [
     {
@@ -74,6 +78,10 @@ export const FAQ = {
     {
       q: 'Ist das kostenlos?',
       a: 'Ja. Kein Konto, keine Upload-Grenze, kein Wasserzeichen.',
+    },
+    {
+      q: 'Wie funktioniert das? (für Techies)',
+      a: 'ShrinkNotes fasst nie Pixel an. Es parst die PDF mit pdf-lib, wählt die großen Seiten-Content-Streams und Form-XObjects aus (nur Flate, mindestens 64 KB), entpackt sie mit fflate und schreibt den dekodierten Operatorstrom in einem Durchlauf mit einem eigenen Lexer um. Alles, was kein gefüllter Pfad ist (Text, Bilder, Clip-Pfade, Rechtecke), wird Byte für Byte übernommen, und Streams mit Inline-Bildern bleiben unangetastet. GoodNotes zeichnet jeden Strich als einen Pfad aus vielen winzigen, überlappenden Subpfaden. Bei jedem Fill-Operator werden deshalb die Subpfade gesammelt, Bézier-Segmente zu Polylinien abgeflacht (Wang-Formel, 0,006 pt Toleranz), auf ein ganzzahliges Raster von 0,001 pt gerundet (doppelte und kollineare Punkte fallen vorher raus, das schützt Clipper2 auch vor einer Endlosschleife bei grob gerundeten Koordinaten) und per Clipper2-Polygonvereinigung zusammengeführt, mit derselben Füllregel wie der ursprüngliche Operator (Nonzero oder Even-Odd). Die entstandene Kontur wird mit Douglas-Peucker bei 0,02 pt ausgedünnt, als m/l/h/f-Operatoren mit zwei Nachkommastellen zurückgeschrieben und mit Level 9 wieder gepackt. Ein Stream wird nur ersetzt, wenn das Ergebnis wirklich kleiner ist, und alles, was der Lexer nicht sauber lesen kann, bleibt unangetastet. Verlust entsteht nur durch diese 0,02 pt geometrische Toleranz: Im Vergleich bei 600 dpi unterscheiden sich die Seiten vom Original nur in ein paar Dutzend Randpixeln. Die Streams laufen, der größte zuerst, parallel in einem Pool aus Web Workern (bis zu 4, auf iOS 2, mit Fallback auf den Hauptthread) mit übertragbaren Buffern, alles bleibt also in deinem Browser. Der Code steht unter MIT-Lizenz auf GitHub: github.com/hermelin-codes/shrinknotes',
     },
   ],
 };
